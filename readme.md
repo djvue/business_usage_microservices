@@ -43,6 +43,7 @@ rm -f logs/error_distribution.png logs/metric_log.csv
 
 # venv
 python -m venv .venv
+source .venv/bin/activate
 pip install -r model/requirements.txt
 pip install -r plot/requirements.txt
 pip install -r metric/requirements.txt
