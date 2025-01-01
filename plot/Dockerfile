@@ -3,4 +3,4 @@ WORKDIR /usr/src/app
 COPY ./requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./src ./
-CMD [ "python", "-u", "features.py" ]
+CMD [ "python", "-u", "plot.py" ]

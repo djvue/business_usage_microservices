@@ -5,12 +5,12 @@ import json
 import os
  
 # Читаем файл с сериализованной моделью
-with open('model.pkl', 'rb') as pkl_file:
+with open('data/model.pkl', 'rb') as pkl_file:
     regressor = pickle.load(pkl_file)
  
 try:
     # Создаём подключение по адресу rabbitmq:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(os.getenv('RABBITMQ_HOST', 'localhost')))
     channel = connection.channel()
  
     # Объявляем очередь features
@@ -44,6 +44,6 @@ try:
  
     # Запускаем режим ожидания прихода сообщений
     channel.start_consuming()
-except:
-    print('Не удалось подключиться к очереди')
-    os.exit(1)
+except Exception as e:
+    print('Ошибка обработки:', type(e), e)
+    exit(1)

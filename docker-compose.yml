@@ -6,16 +6,24 @@ services:
     container_name: rabbitmq
     hostname: rabbitmq
     restart: always
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
     ports:
       - 5672:5672
       - 15672:15672
 
-  features:
+  learn_model:
     build:
-      context: ./features
-    restart: always
-    depends_on:
-      - rabbitmq
+      context: ./model
+    restart: on-failure
+    command: python train_model.py
+    environment:
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ./data/:/usr/src/app/data/
 
   model:
     build:
@@ -23,6 +31,20 @@ services:
     restart: always
     depends_on:
       - rabbitmq
+      - learn_model
+    environment:
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ./data/:/usr/src/app/data/
+
+  features:
+    build:
+      context: ./features
+    restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_HOST: rabbitmq
 
   metric:
     build:
@@ -30,5 +52,18 @@ services:
     restart: always
     depends_on:
       - rabbitmq
+    environment:
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ./logs/:/usr/src/app/logs/
+
+  plot:
+    build:
+      context: ./plot
+    restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_HOST: rabbitmq
     volumes:
       - ./logs/:/usr/src/app/logs/
